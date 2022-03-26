@@ -167,18 +167,14 @@ const handleError = (OsascriptMessage: string) => {
   const errorTypeString = errorGroups?.type ?? "";
   const errorMessage = errorGroups?.message?.trim() ??
     "An error occured";
-  const errorMapping: Record<
-    string,
-    ErrorConstructor | AggregateErrorConstructor
-  > = {
-    "Error": Error,
-    "AggregateError": AggregateError,
-    "EvalError": EvalError,
-    "RangeError": RangeError,
-    "ReferenceError": ReferenceError,
-    "SyntaxError": SyntaxError,
-    "TypeError": TypeError,
-    "URIError": URIError,
+  const errorMapping: Record<string, ErrorConstructor> = {
+    Error: Error,
+    EvalError: EvalError,
+    RangeError: RangeError,
+    ReferenceError: ReferenceError,
+    SyntaxError: SyntaxError,
+    TypeError: TypeError,
+    URIError: URIError,
   };
   const errorType = errorMapping?.[errorTypeString] ?? Error;
   throw errorType(errorMessage);
