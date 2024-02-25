@@ -137,17 +137,18 @@ const runInOsascript = async (code: string, args: any[]) => {
     stdin: "piped",
     stdout: "piped",
     stderr: "piped",
-  }).spawn();
+  });
+  const process = cmd.spawn();
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
-  const stdin = cmd.stdin.getWriter();
-  await stdin.write(encoder.encode(code));
-  await stdin.releaseLock();
-  cmd.stdin.close();
+  const writer = process.stdin.getWriter();
+  await writer.write(encoder.encode(code));
+  writer.releaseLock();
+  await process.stdin.close();
 
-  const { stderr: error, stdout: output } = await cmd.output();
+  const { stderr: error, stdout: output } = await process.output();
 
   if (error.length) handleError(decoder.decode(error));
   const outStr = decoder.decode(output);
