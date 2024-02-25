@@ -131,23 +131,24 @@ export function run(jxaFunction: (...args: any[]) => any, ...args: any[]) {
 }
 
 const runInOsascript = async (code: string, args: any[]) => {
-  const cmd = Deno.run({
-    cmd: ["osascript", "-l", "JavaScript"],
+  const cmd = new Deno.Command("osascript", {
+    args: ["-l", "JavaScript"],
     env: { OSA_ARGS: JSON.stringify(args) },
     stdin: "piped",
     stdout: "piped",
     stderr: "piped",
   });
+  const process = cmd.spawn();
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
-  await cmd.stdin.write(encoder.encode(code));
-  cmd.stdin.close();
+  const writer = process.stdin.getWriter();
+  await writer.write(encoder.encode(code));
+  writer.releaseLock();
+  await process.stdin.close();
 
-  const error = await cmd.stderrOutput();
-  const output = await cmd.output();
-  cmd.close();
+  const { stderr: error, stdout: output } = await process.output();
 
   if (error.length) handleError(decoder.decode(error));
   const outStr = decoder.decode(output);
